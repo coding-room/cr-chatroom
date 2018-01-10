@@ -1,12 +1,16 @@
 package cr.chatroom;
 
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 public class ChatroomApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ChatroomApplication.class, args);
+	public static void main(String[] args) throws Exception{
+		ConfigurableApplicationContext context = SpringApplication.run(ChatroomApplication.class, args);
+		TCPServer tcpServer = context.getBean(TCPServer.class);
+		tcpServer.start();
 	}
 }
