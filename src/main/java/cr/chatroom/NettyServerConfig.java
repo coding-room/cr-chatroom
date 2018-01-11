@@ -1,11 +1,19 @@
 package cr.chatroom;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.http.HttpObjectAggregator;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,18 +39,29 @@ public class NettyServerConfig {
     @Value("${netty.server.port}")
     private int port;
 
-    @Autowired
-    private NettyWebSocketChannelInitializer nettyWebSocketChannelInitializer;
-
     @Bean(name = "serverBootstrap")
     public ServerBootstrap bootstrap() {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(bossGroup(), workerGroup())
                 .channel(NioServerSocketChannel.class)
                 .option(ChannelOption.SO_BACKLOG, 1024)
-                .option(ChannelOption.SO_KEEPALIVE, true)
-                .handler(new LoggingHandler(LogLevel.DEBUG))
-                .childHandler(nettyWebSocketChannelInitializer);
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        ChannelPipeline pipeline = socketChannel.pipeline();
+                        // 打印日志,可以看到websocket帧数据
+                        pipeline.addFirst(new LoggingHandler(LogLevel.INFO));
+                        // Http消息编码解码
+                        pipeline.addLast("http-codec", new HttpServerCodec());
+                        // Http消息组装
+                        pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
+                        // WebSocket通信支持
+                        pipeline.addLast("http-chunked", new ChunkedWriteHandler());
+                        pipeline.addLast("1", new ServerHandler1());
+//                        pipeline.addLast("2", new ServerHandler2());
+                    }
+                });
         return bootstrap;
     }
 

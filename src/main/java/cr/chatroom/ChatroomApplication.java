@@ -10,7 +10,7 @@ public class ChatroomApplication {
 
 	public static void main(String[] args) throws Exception{
 		ConfigurableApplicationContext context = SpringApplication.run(ChatroomApplication.class, args);
-		TCPServer tcpServer = context.getBean(TCPServer.class);
-		tcpServer.start();
+		WebSocketServer webSocketServer = context.getBean(WebSocketServer.class);
+		webSocketServer.start();
 	}
 }

@@ -14,7 +14,7 @@ import java.net.InetSocketAddress;
  * @Date 2018/1/10
  */
 @Component
-public class TCPServer {
+public class WebSocketServer {
 
     @Autowired
     private ServerBootstrap serverBootstrap;
