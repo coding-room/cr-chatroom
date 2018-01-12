@@ -1,4 +1,4 @@
-package cr.chatroom;
+package chatroom.ws;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -8,23 +8,14 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.HttpServerCodec;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * netty服务端配置
@@ -33,7 +24,7 @@ import java.util.Set;
  * @Date 2018/1/10
  */
 @Configuration
-@ConfigurationProperties
+@PropertySource("classpath:application.yml")
 public class NettyServerConfig {
 
     @Value("${netty.server.port}")
@@ -51,14 +42,14 @@ public class NettyServerConfig {
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
                         ChannelPipeline pipeline = socketChannel.pipeline();
                         // 打印日志,可以看到websocket帧数据
-                        pipeline.addFirst(new LoggingHandler(LogLevel.INFO));
+//                        pipeline.addFirst(new LoggingHandler(LogLevel.INFO));
                         // Http消息编码解码
                         pipeline.addLast("http-codec", new HttpServerCodec());
                         // Http消息组装
                         pipeline.addLast("aggregator", new HttpObjectAggregator(65536));
                         // WebSocket通信支持
                         pipeline.addLast("http-chunked", new ChunkedWriteHandler());
-                        pipeline.addLast("1", new ServerHandler1());
+                        pipeline.addLast(new WebSocketHandler());
 //                        pipeline.addLast("2", new ServerHandler2());
                     }
                 });

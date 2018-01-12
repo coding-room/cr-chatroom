@@ -1,4 +1,4 @@
-package cr.chatroom;
+package chatroom.ws;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -6,17 +6,16 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.Headers;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import io.netty.util.ReferenceCountUtil;
-import org.springframework.http.HttpHeaders;
 
 /**
  * @Author TDKnight
  * @Date 2018/1/10
  */
-public class ServerHandler1 extends SimpleChannelInboundHandler {
+public class WebSocketHandler extends SimpleChannelInboundHandler {
 
     private WebSocketServerHandshaker handshaker;
 
@@ -51,7 +50,7 @@ public class ServerHandler1 extends SimpleChannelInboundHandler {
         }
 
         // 正常WebSocket的Http连接请求，构造握手响应返回
-        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory("ws://" + request.headers().get(HttpHeaders.HOST), null, false);
+        WebSocketServerHandshakerFactory wsFactory = new WebSocketServerHandshakerFactory("ws://", null, false);
         handshaker = wsFactory.newHandshaker(request);
         if (handshaker == null) { // 无法处理的websocket版本
 //            WebSocketServerHandshakerFactory.sendUnsupportedWebSocketVersionResponse(ctx.channel());

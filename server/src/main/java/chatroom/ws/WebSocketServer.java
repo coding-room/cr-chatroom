@@ -1,4 +1,4 @@
-package cr.chatroom;
+package chatroom.ws;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
